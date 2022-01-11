@@ -5,10 +5,11 @@ import { Item, ItemDocument, ItemSchema } from './items.schema';
 
 @Injectable()
 export class ItemsService {
-    constructor(@InjectModel(Item.name) private itemModel: Model<ItemDocument>) {}
+    constructor(@InjectModel(Item.name) private readonly itemModel: Model<ItemDocument>) {}
 
     async createItem(item): Promise<ItemDocument> {
         item.price = Number(item.price.toFixed(2))
+        item.inStock = (item.quantity > 0)
         const createdItem = new this.itemModel(item)
         return await createdItem.save();
     }
@@ -22,10 +23,29 @@ export class ItemsService {
         return item;
     }
 
+    async queryItems(options): Promise<ItemDocument[]> {
+        return await this.itemModel.find(options).exec();
+    }
+
     async updateItem(id, updateBody): Promise<ItemDocument> {
         const item = await this.itemModel.findById(id);
         Object.assign(item, updateBody)
         return await item.save();
+
+    }
+
+    async action(id, action, quantity): Promise<ItemDocument>{
+        switch(action){
+            case "add":{
+                return this.add(id, quantity)
+            }
+            case "remove":{
+                return this.remove(id, quantity)
+            }
+            case "sell":{
+                return this.sell(id, quantity)
+            }
+        }
     }
 
     async add(id, quantity): Promise<ItemDocument> {
@@ -40,6 +60,7 @@ export class ItemsService {
             throw new HttpException(`Cannot remove more than existing quantity: ${item.quantity}`, HttpStatus.BAD_REQUEST);
         }
         item.quantity -= quantity;
+        item.inStock = (item.quantity > 0)
         return await item.save();
     }
 
@@ -51,6 +72,7 @@ export class ItemsService {
         }
         item.quantity -= quantity;
         item.sold += quantity;
+        item.inStock = (item.quantity > 0)
         return await item.save();
     }
 

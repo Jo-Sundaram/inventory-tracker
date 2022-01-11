@@ -15,10 +15,6 @@ async function bootstrap() {
   .addTag('items')
   .build();
 
-  const options: SwaggerDocumentOptions = {
-    include: [ItemsModule]
-  };
-
   const document = SwaggerModule.createDocument(app, config, {include: [ItemsModule]});
 
   SwaggerModule.setup('api/docs/inventory-tracker', app, document);

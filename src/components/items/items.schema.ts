@@ -27,13 +27,19 @@ export class Item {
 
   @Prop({required: true, default: false})
   inStock: Boolean;
-
+  
   @Prop({required: false, default: Date.now })
   created_at: Date;
+  
+  checkStock: () => Boolean;
 
 }
 
 
 export const ItemSchema = SchemaFactory.createForClass(Item);
 
+ItemSchema.methods.checkStock = function(this: Item){
+  this.inStock = this.quantity > 0;
+  return this.inStock;
+}
 

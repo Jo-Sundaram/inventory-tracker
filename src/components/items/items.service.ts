@@ -9,8 +9,8 @@ export class ItemsService {
 
     async createItem(item): Promise<ItemDocument> {
         item.price = Number(item.price.toFixed(2))
-        item.inStock = (item.quantity > 0)
         const createdItem = new this.itemModel(item)
+        createdItem.checkStock();
         return await createdItem.save();
     }
 
@@ -30,6 +30,7 @@ export class ItemsService {
     async updateItem(id, updateBody): Promise<ItemDocument> {
         const item = await this.itemModel.findById(id);
         Object.assign(item, updateBody)
+        item.checkStock();
         return await item.save();
 
     }
@@ -51,6 +52,7 @@ export class ItemsService {
     async add(id, quantity): Promise<ItemDocument> {
         const item = await this.itemModel.findOne({_id: id}).exec();
         item.quantity += quantity;
+        item.checkStock();
         return await item.save();
     }
 
@@ -60,7 +62,7 @@ export class ItemsService {
             throw new HttpException(`Cannot remove more than existing quantity: ${item.quantity}`, HttpStatus.BAD_REQUEST);
         }
         item.quantity -= quantity;
-        item.inStock = (item.quantity > 0)
+        item.checkStock();
         return await item.save();
     }
 
@@ -72,7 +74,7 @@ export class ItemsService {
         }
         item.quantity -= quantity;
         item.sold += quantity;
-        item.inStock = (item.quantity > 0)
+        item.checkStock();
         return await item.save();
     }
 

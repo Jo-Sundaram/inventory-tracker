@@ -5,6 +5,7 @@ import { ItemDTO } from './dto/create-item.dto';
 import { ItemActionDTO } from './dto/item-action.dto';
 import { ItemIdDTO } from './dto/item-id.dto';
 import { ItemQuantityDTO } from './dto/item-quantity.dto';
+import { QueryItemDTO } from './dto/query-item.dto';
 import { UpdateItemDTO } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
 
@@ -28,7 +29,7 @@ export class ItemsController {
     }
 
     /**
-     * Query for items
+     * Query for items with the following query fields
      */
      @ApiOkResponse({
       description: 'Successfully retrieves queried items',
@@ -36,13 +37,13 @@ export class ItemsController {
     })
     @Get()
     @Bind(Res(), Query())
-    async findAll(res, query) {
+    async findAll(res, query: QueryItemDTO) {
       const items = await this.itemService.queryItems(query);
       res.status(HttpStatus.OK).send(items);
     }
 
     /**
-     * Query for items using query string values
+     * Query for an item by id 
      */
     @Get(':id')
     @ApiOkResponse({
@@ -55,6 +56,9 @@ export class ItemsController {
       res.status(HttpStatus.OK).send(item);
     }
 
+    /**
+     * Update the fields of an item with the given id
+     */
     @Patch(':id')
     @ApiOkResponse({
       description: 'Successfully updates item',
@@ -66,6 +70,9 @@ export class ItemsController {
       res.status(HttpStatus.OK).send(item);
     }
 
+    /**
+     * Perform an action on an item with the given id 
+     */
     @Patch(':id/:action')
     @ApiOkResponse({
       description: 'Successfully updates item',
@@ -77,7 +84,9 @@ export class ItemsController {
       res.status(HttpStatus.OK).send(item);
     }
 
-
+   /**
+    * Delete an item with the given id
+    */
     @Delete(':id')
     @ApiNoContentResponse({
       description: 'Successfully deletes item',
